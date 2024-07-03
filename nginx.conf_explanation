@@ -1,26 +1,33 @@
+#NGINX'in root kullanıcısı altında çalışacağını belirtir.
 user  root;
+#NGINX'in bir  worker kullanacağını belirtir.
 worker_processes  1;
 
-
+#events bloğu, işçi süreçlerinin nasıl çalıştığını belirler. worker_connections 4096; ifadesi, her işçi sürecinin 4096 eşzamanlı bağlantıyı işleyebileceğini belirtir.
 events {
     worker_connections 4096;
 }
 
+#http bloğu, HTTP sunucusunun yapılandırmasını içerir. include mime.types; ifadesi, MIME türlerini belirten dosyayı dahil eder. default_type application/octet-stream; ifadesi, varsayılan içerik türünü belirtir.
 http {
     include       mime.types;
     default_type  application/octet-stream;
 
+#sendfile on; ifadesi, daha verimli dosya gönderimi için sendfile işlevini etkinleştirir. tcp_nopush on; ve tcp_nodelay on; ifadeleri, TCP paketlerinin optimize edilmesini sağlar.
     # Sending fille Optimization
     sendfile on;
     tcp_nopush on;
     tcp_nodelay on;
 
+#keepalive_timeout 65; ifadesi, keep-alive bağlantılarının zaman aşımı süresini 65 saniye olarak ayarlar.
     # Keepalive Connection
     keepalive_timeout 65;
 
+#server bloğu, sunucu yapılandırmasını içerir. listen 80; ifadesi, sunucunun 80 numaralı portu dinleyeceğini belirtir.
     server {
         listen 80;
 
+#location /audio bloğu, /audio yoluna gelen istekleri yönetir. proxy_set_header direktifleri, yükseltilmiş bağlantı başlıklarını ayarlar ve proxy_pass direktifi istekleri yerel 8081 portuna iletir.
 	location /audio {
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
@@ -29,6 +36,7 @@ http {
             proxy_pass http://127.0.0.1:8081;
         }
 
+#location / bloğu, ana kök yoluna gelen istekleri yönetir. Aynı proxy_set_header direktifleri burada da kullanılır ve istekler yerel 8080 portuna iletilir.
         location / {
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
